@@ -39,12 +39,21 @@ export function parseTokens(src: string): Stack<Token> {
   return r;
 }
 
+const priorityMap: Record<string, number> = {
+  "(": 0,
+  "+": 1,
+  "-": 1,
+  "*": 2,
+  "/": 2,
+};
+
 //l<=r?
 function priority(l: string, r: string): boolean {
-  if (r === "(") return false;
-  if (l === "+" || l === "-") return true;
-  if ((l === "*" || l === "/") && (r === "*" || r === "/")) return true;
-  return false;
+  return priorityMap[l] <= priorityMap[r];
+  // if (r === "(") return false;
+  // if (l === "+" || l === "-") return true;
+  // if ((l === "*" || l === "/") && (r === "*" || r === "/")) return true;
+  // return false;
 }
 
 export function excahnge(tk: Stack<Token>): Stack<Token> {
