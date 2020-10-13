@@ -3,7 +3,7 @@ class Stack<T> {
     this.l = [];
   }
   l: T[];
-  get length() {
+  size(): number {
     return this.l.length;
   }
   at(index: number): T {
@@ -14,8 +14,8 @@ class Stack<T> {
   empty(): boolean {
     return this.l.length === 0;
   }
-  push(...items: T[]): number {
-    return this.l.push(...items);
+  push(it: T): number {
+    return this.l.push(it);
   }
   top(): T {
     if (this.empty()) {

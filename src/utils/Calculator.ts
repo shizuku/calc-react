@@ -39,6 +39,7 @@ export function parseTokens(src: string): Stack<Token> {
   return r;
 }
 
+//l<=r?
 function priority(l: string, r: string): boolean {
   if (r === "(") return false;
   if (l === "+" || l === "-") return true;
@@ -49,24 +50,25 @@ function priority(l: string, r: string): boolean {
 export function excahnge(tk: Stack<Token>): Stack<Token> {
   let r: Stack<Token> = new Stack();
   let st: Stack<Token> = new Stack();
-  for (let i = 0; i < tk.length; ++i) {
+  for (let i = 0; i < tk.size(); ++i) {
     if (tk.at(i).type === "num") {
       r.push(tk.at(i));
     } else if (tk.at(i).type === "op") {
-      if (st.length === 0 || tk.at(i).op === "(") {
+      if (st.empty() || tk.at(i).op === "(") {
         st.push(tk.at(i));
       } else {
         if (tk.at(i).op === ")") {
-          while (st.length > 0 && st.at(st.length - 1).op !== "(") {
-            let p = st.pop();
-            if (p) r.push(p);
+          while (!st.empty() && st.top().op !== "(") {
+            r.push(st.pop());
           }
           st.pop();
         } else {
-          if (priority(tk.at(i).op, st.at(st.length - 1).op)) {
-            while (st.length > 0 && st.at(st.length - 1).op !== "(") {
-              let p = st.pop();
-              if (p) r.push(p);
+          if (priority(tk.at(i).op, st.top().op)) {
+            r.push(st.pop());
+            while (!st.empty()) {
+              if (priority(tk.at(i).op, st.top().op)) {
+                r.push(st.pop());
+              } else break;
             }
             st.push(tk.at(i));
           } else {
@@ -76,37 +78,30 @@ export function excahnge(tk: Stack<Token>): Stack<Token> {
       }
     }
   }
-  while (st.length > 0) {
-    let p = st.pop();
-    if (p) r.push(p);
+  while (!st.empty()) {
+    r.push(st.pop());
   }
   return r;
 }
 
 function operate(a: number, b: number, op: string): number {
-  let r = 0;
   switch (op) {
     case "+":
-      r = a + b;
-      break;
+      return a + b;
     case "-":
-      r = a - b;
-      break;
+      return a - b;
     case "*":
-      r = a * b;
-      break;
+      return a * b;
     case "/":
-      r = a / b;
-      break;
+      return a / b;
     default:
-      break;
+      return NaN;
   }
-  return r;
 }
 
 export function calculate(tk: Stack<Token>): number {
   let st: Stack<Token> = new Stack();
-  for (let i = 0; i < tk.length; ++i) {
+  for (let i = 0; i < tk.size(); ++i) {
     if (tk.at(i).type === "num") {
       st.push(tk.at(i));
     } else if (tk.at(i).type === "op") {
@@ -117,9 +112,15 @@ export function calculate(tk: Stack<Token>): number {
       );
     }
   }
-  return st.length > 0 ? st.at(st.length - 1).num : 0;
+  return st.empty() ? NaN : st.top().num;
 }
 
 export function calc(src: string): number {
-  return calculate(excahnge(parseTokens(src)));
+  let tokens = parseTokens(src);
+  console.log("tokens: ", tokens);
+  let tailTokens = excahnge(tokens);
+  console.log("tailTokens", tailTokens);
+  let result = calculate(tailTokens);
+  console.log("result", result);
+  return result;
 }
