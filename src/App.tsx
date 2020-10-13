@@ -1,19 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import "./App.css";
-import { calculate, excahnge, parseTokens } from "./utils/Calculator";
+import { calc } from "./utils/Calculator";
+import { Input } from "antd";
+
+const { Search } = Input;
 
 function App() {
-  useEffect(() => {
-    let a = parseTokens("2*(9+6/3-5)+4");
-    console.log(a);
-    let b = excahnge(a);
-    console.log(b);
-    let c = calculate(b);
-    console.log(c);
-  });
+  let re = useRef<HTMLDivElement>(null);
   return (
     <div className="App">
-     
+      <div className="content">
+        <Search
+          placeholder="input expression"
+          onSearch={(value) => {
+            let r = calc(value);
+            if (re.current) {
+              re.current.innerText = "result: " + r.toString();
+            }
+          }}
+          enterButton="OK"
+        />
+        <div ref={re} className="result">
+          result:
+        </div>
+      </div>
     </div>
   );
 }

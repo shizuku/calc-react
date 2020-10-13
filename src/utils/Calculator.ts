@@ -1,3 +1,5 @@
+import Stack from "./Stack";
+
 export class Token {
   setNum(num: number) {
     this.type = "num";
@@ -14,8 +16,8 @@ export class Token {
   op: string = "";
 }
 
-export function parseTokens(src: string): Token[] {
-  let r: Token[] = [];
+export function parseTokens(src: string): Stack<Token> {
+  let r: Stack<Token> = new Stack();
   for (let i = 0; i < src.length; ++i) {
     if (src[i] >= "0" && src[i] <= "9") {
       let j = i;
@@ -44,31 +46,31 @@ function priority(l: string, r: string): boolean {
   return false;
 }
 
-export function excahnge(tk: Token[]): Token[] {
-  let r: Token[] = [];
-  let st: Token[] = [];
+export function excahnge(tk: Stack<Token>): Stack<Token> {
+  let r: Stack<Token> = new Stack();
+  let st: Stack<Token> = new Stack();
   for (let i = 0; i < tk.length; ++i) {
-    if (tk[i].type === "num") {
-      r.push(tk[i]);
-    } else if (tk[i].type === "op") {
-      if (st.length === 0 || tk[i].op === "(") {
-        st.push(tk[i]);
+    if (tk.at(i).type === "num") {
+      r.push(tk.at(i));
+    } else if (tk.at(i).type === "op") {
+      if (st.length === 0 || tk.at(i).op === "(") {
+        st.push(tk.at(i));
       } else {
-        if (tk[i].op === ")") {
-          while (st.length > 0 && st[st.length - 1].op !== "(") {
+        if (tk.at(i).op === ")") {
+          while (st.length > 0 && st.at(st.length - 1).op !== "(") {
             let p = st.pop();
             if (p) r.push(p);
           }
           st.pop();
         } else {
-          if (priority(tk[i].op, st[st.length - 1].op)) {
-            while (st.length > 0 && st[st.length - 1].op !== "(") {
+          if (priority(tk.at(i).op, st.at(st.length - 1).op)) {
+            while (st.length > 0 && st.at(st.length - 1).op !== "(") {
               let p = st.pop();
               if (p) r.push(p);
             }
-            st.push(tk[i]);
+            st.push(tk.at(i));
           } else {
-            st.push(tk[i]);
+            st.push(tk.at(i));
           }
         }
       }
@@ -102,16 +104,22 @@ function operate(a: number, b: number, op: string): number {
   return r;
 }
 
-export function calculate(tk: Token[]): number {
-  let st: Token[] = [];
+export function calculate(tk: Stack<Token>): number {
+  let st: Stack<Token> = new Stack();
   for (let i = 0; i < tk.length; ++i) {
-    if (tk[i].type === "num") {
-      st.push(tk[i]);
-    } else if (tk[i].type === "op") {
+    if (tk.at(i).type === "num") {
+      st.push(tk.at(i));
+    } else if (tk.at(i).type === "op") {
       let a = st.pop();
       let b = st.pop();
-      st.push(new Token().setNum(operate(b?.num || 0, a?.num || 0, tk[i].op)));
+      st.push(
+        new Token().setNum(operate(b?.num || 0, a?.num || 0, tk.at(i).op))
+      );
     }
   }
-  return st.length > 0 ? st[st.length - 1].num : 0;
+  return st.length > 0 ? st.at(st.length - 1).num : 0;
+}
+
+export function calc(src: string): number {
+  return calculate(excahnge(parseTokens(src)));
 }
